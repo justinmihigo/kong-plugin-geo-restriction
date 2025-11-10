@@ -9,38 +9,59 @@ return {
       protocols = typedefs.protocols {
         default = {"http", "https", "tcp", "tls", "grpc", "grpcs"}
       }
-    }, {
+    },
+    {
       config = {
         type = "record",
         fields = {
           {
             allow = {
-              -- description = "List of countries to allow. One of `config.whitelist_countries` or `config.blacklist_countries` must be specified.",
               type = "set",
-              elements = {type = "string"}
+              elements = { type = "string" }, -- ISO country codes
+              required = false
             }
-          }, {
+          },
+          {
             deny = {
-              -- description = "List of countries to deny. One of `config.whitelist_countries` or `config.blacklist_countries` must be specified.",
               type = "set",
-              elements = {type = "string"}
+              elements = { type = "string" },
+              required = false
             }
-          }, {
+          },
+          {
+            allow_ips = {
+              type = "set",
+              elements = { type = "string" }, -- e.g., "192.168.0.1" or "10.0.0.0/24"
+              required = false
+            }
+          },
+          {
+            deny_ips = {
+              type = "set",
+              elements = { type = "string" },
+              required = false
+            }
+          },
+          {
             status = {
-              -- description = "The HTTP status of the requests that will be rejected by the plugin.",
               type = "number",
-              required = false
+              default = 403
             }
-          }, {
+          },
+          {
             message = {
-              -- description = "The message to send as a response body to rejected requests.",
               type = "string",
-              required = false
+              default = "Access restricted by Geo-IP policy"
             }
           }
         }
       }
     }
   },
-  entity_checks = {{at_least_one_of = {"config.allow", "config.deny"}}}
+  entity_checks = {
+    { at_least_one_of = {
+        "config.allow", "config.deny", "config.allow_ips", "config.deny_ips"
+    }}
+  }
 }
+
